@@ -450,6 +450,29 @@ module WxPay
 
       r
     end
+    
+    def self.sendminiprogramhb(params, options={})
+      params = {
+        wxappid: options.delete(:appid) || WxPay.appid,
+        mch_id: options.delete(:mch_id) || WxPay.mch_id,
+        key: options.delete(:key) || WxPay.key,
+        nonce_str: SecureRandom.uuid.tr('-', '')
+      }.merge(params)
+
+      #check_required_options(params, INVOKE_MICROPAY_REQUIRED_FIELDS)
+
+      options = {
+        ssl_client_cert: options.delete(:apiclient_cert) || WxPay.apiclient_cert,
+        ssl_client_key: options.delete(:apiclient_key) || WxPay.apiclient_key,
+        verify_ssl: OpenSSL::SSL::VERIFY_NONE
+      }.merge(options)
+
+      r = WxPay::Result.new(Hash.from_xml(invoke_remote("/mmpaymkttransfers/sendminiprogramhb", make_payload(params), options)))
+
+      yield r if block_given?
+
+      r
+    end
 
     # 用于商户对已发放的红包进行查询红包的具体信息，可支持普通红包和裂变包。
     GETHBINFO_FIELDS = [:mch_billno, :bill_type]
